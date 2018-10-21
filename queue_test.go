@@ -57,7 +57,7 @@ func TestQueue1(t *testing.T) {
 	}
 
 	if len(q.buckets) != maxFreelist {
-		t.Logf("length of buckets is not %d, is %d", maxFreelist+1, len(q.buckets))
+		t.Logf("length of buckets is not %d, is %d", maxFreelist, len(q.buckets))
 		t.Fail()
 	}
 
@@ -66,7 +66,7 @@ func TestQueue1(t *testing.T) {
 	}
 
 	if len(q.buckets) != maxFreelist/4 {
-		t.Logf("length of buckets is not %d, is %d", maxFreelist/4+1, len(q.buckets))
+		t.Logf("length of buckets is not %d, is %d", maxFreelist/4, len(q.buckets))
 		t.Fail()
 	}
 
