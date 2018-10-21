@@ -15,6 +15,9 @@ type Queue struct {
 
 	buckets  [][]interface{}
 	freelist [][]interface{}
+
+	// for reallocation of buckets
+	orgBuckets [][]interface{}
 }
 
 // Enqueue pushes a value into the queue.
@@ -35,7 +38,9 @@ func (q *Queue) Enqueue(v interface{}) {
 			// create bucket
 			bkt = make([]interface{}, bucketSize)
 		}
+		// realloc freelist automatically when necessary, TestSlice in slice_test.go
 		q.buckets = append(q.buckets, bkt)
+		q.orgBuckets = q.buckets
 	} else {
 		bkt = q.buckets[bp]
 	}
@@ -64,6 +69,14 @@ func (q *Queue) Dequeue() (v interface{}, ok bool) {
 	if q.front%bucketSize == 0 {
 		q.buckets[bp] = nil // free the bucket
 		q.buckets = q.buckets[1:]
+
+		// recude memory usage when no reallocation(append in Enqueue), TestSlice1 in slice_test.go
+		if len(q.buckets) <= cap(q.orgBuckets)/4 { // the usage is less than or equal to a quater of the capacity
+			tmp := make([][]interface{}, cap(q.orgBuckets)/2)
+			n := copy(tmp, q.buckets)
+			q.buckets = tmp[:n]
+			q.orgBuckets = tmp
+		}
 
 		// reuse bucket
 		if useFreelist && len(q.freelist) < maxFreelist {

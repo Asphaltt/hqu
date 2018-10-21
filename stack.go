@@ -13,6 +13,9 @@ type Stack struct {
 
 	buckets  [][]interface{}
 	freelist [][]interface{}
+
+	// for reallocation of buckets
+	orgBuckets [][]interface{}
 }
 
 // Push pushes a value into the stack.
@@ -33,7 +36,9 @@ func (s *Stack) Push(v interface{}) {
 		} else {
 			bkt = make([]interface{}, bucketSize) // create bucket
 		}
+		// realloc freelist automatically when necessary, TestSlice in slice_test.go
 		s.buckets = append(s.buckets, bkt)
+		s.orgBuckets = s.buckets
 	} else {
 		bkt = s.buckets[bp]
 	}
@@ -62,6 +67,14 @@ func (s *Stack) Pop() (v interface{}, ok bool) {
 	if qp == 0 {
 		s.buckets[bp] = nil // free the bucket
 		s.buckets = s.buckets[:len(s.buckets)-1]
+
+		// reduce memory usage when no reallocation(append in Pushs), TestSlice2 in slice_test.go
+		if len(s.buckets) <= cap(s.orgBuckets)/4 { // the usage is less than or equal to a quater of the capacity
+			tmp := make([][]interface{}, cap(s.orgBuckets)/2)
+			n := copy(tmp, s.buckets)
+			s.buckets = tmp[:n]
+			s.orgBuckets = tmp
+		}
 
 		// reuse bucket
 		if useFreelist && len(s.freelist) < maxFreelist {
