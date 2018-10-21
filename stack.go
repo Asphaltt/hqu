@@ -18,6 +18,14 @@ type Stack struct {
 	orgBuckets [][]interface{}
 }
 
+// Size gets the count of elements in stack
+func (s *Stack) Size() int {
+	s.Lock()
+	size := s.pos
+	s.Unlock()
+	return size
+}
+
 // Push pushes a value into the stack.
 func (s *Stack) Push(v interface{}) {
 	s.Lock()

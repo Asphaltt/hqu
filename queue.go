@@ -20,6 +20,14 @@ type Queue struct {
 	orgBuckets [][]interface{}
 }
 
+// Size gets the count of elements in queue
+func (q *Queue) Size() int {
+	q.Lock()
+	size := q.rear - q.front
+	q.Unlock()
+	return size
+}
+
 // Enqueue pushes a value into the queue.
 func (q *Queue) Enqueue(v interface{}) {
 	q.Lock()

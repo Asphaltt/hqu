@@ -98,3 +98,25 @@ func TestStack1(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestStackSize(t *testing.T) {
+	s := &Stack{}
+
+	for i := 0; i < bucketSize+1; i++ {
+		s.Push(i)
+	}
+
+	if s.Size() != bucketSize+1 {
+		t.Logf("size of stack is not %d, is %d", bucketSize+1, s.Size())
+		t.Fail()
+	}
+
+	for i := 0; i < bucketSize; i++ {
+		s.Pop()
+	}
+
+	if s.Size() != 1 {
+		t.Logf("size of stack is not %d, is %d", 1, s.Size())
+		t.Fail()
+	}
+}

@@ -75,3 +75,25 @@ func TestQueue1(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestQueueSize(t *testing.T) {
+	q := &Queue{}
+
+	for i := 0; i < bucketSize+1; i++ {
+		q.Enqueue(i)
+	}
+
+	if q.Size() != bucketSize+1 {
+		t.Logf("size of queue is not %d, is %d", bucketSize+1, q.Size())
+		t.Fail()
+	}
+
+	for i := 0; i < bucketSize; i++ {
+		q.Dequeue()
+	}
+
+	if q.Size() != 1 {
+		t.Logf("size of queue is not %d, is %d", 1, q.Size())
+		t.Fail()
+	}
+}
