@@ -11,9 +11,14 @@ type sizer interface {
 	Size() int
 }
 
+type ranger interface {
+	Range(func(interface{}) bool)
+}
+
 // Queuer interface for queue
 type Queuer interface {
 	sizer
+	ranger
 	Enqueue(v interface{})
 	Dequeue() (v interface{}, ok bool)
 }
@@ -21,6 +26,7 @@ type Queuer interface {
 // Stacker interface for stack
 type Stacker interface {
 	sizer
+	ranger
 	Push(v interface{})
 	Pop() (v interface{}, ok bool)
 }

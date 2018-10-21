@@ -120,3 +120,33 @@ func TestStackSize(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestStackRange(t *testing.T) {
+	s := &Stack{}
+
+	for i := 0; i < bucketSize+1; i++ {
+		s.Push(i)
+	}
+
+	idx := 0
+	s.Range(func(v interface{}) bool {
+		if v != idx {
+			t.Fatalf("the `%d`th element is not %d, is %v", idx, idx, v)
+			return false
+		}
+		idx++
+		return true
+	})
+
+	for i := 0; i < bucketSize; i++ {
+		s.Pop()
+	}
+
+	s.Range(func(v interface{}) bool {
+		if v != 0 {
+			t.Fatalf("the remain one element is not 0, is %v", v)
+			return false
+		}
+		return true
+	})
+}

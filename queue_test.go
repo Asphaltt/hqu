@@ -97,3 +97,33 @@ func TestQueueSize(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestQueueRange(t *testing.T) {
+	q := &Queue{}
+
+	for i := 0; i < bucketSize+1; i++ {
+		q.Enqueue(i)
+	}
+
+	idx := 0
+	q.Range(func(v interface{}) bool {
+		if v != idx {
+			t.Fatalf("the `%d`th element is not %d, is %v", idx, idx, v)
+			return false
+		}
+		idx++
+		return true
+	})
+
+	for i := 0; i < bucketSize; i++ {
+		q.Dequeue()
+	}
+
+	q.Range(func(v interface{}) bool {
+		if v != bucketSize {
+			t.Fatalf("the remain one element is not %d, is %v", bucketSize, v)
+			return false
+		}
+		return true
+	})
+}

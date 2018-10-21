@@ -20,6 +20,8 @@ type Queue struct {
 	orgBuckets [][]interface{}
 }
 
+var _ Queuer = &Queue{}
+
 // Size gets the count of elements in queue
 func (q *Queue) Size() int {
 	q.Lock()
@@ -97,4 +99,17 @@ func (q *Queue) Dequeue() (v interface{}, ok bool) {
 
 	q.Unlock()
 	return
+}
+
+// Range does range all elements in queue with mutex lock,
+// so you can't do `Enqueue` or `Dequeue` in `Range`.
+func (q *Queue) Range(handle func(v interface{}) bool) {
+	q.Lock()
+	for i := q.front; i < q.rear; i++ {
+		bp, fp := i/bucketSize, i%bucketSize
+		if !handle(q.buckets[bp][fp]) {
+			break
+		}
+	}
+	q.Unlock()
 }

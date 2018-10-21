@@ -18,6 +18,8 @@ type Stack struct {
 	orgBuckets [][]interface{}
 }
 
+var _ Stacker = &Stack{}
+
 // Size gets the count of elements in stack
 func (s *Stack) Size() int {
 	s.Lock()
@@ -92,4 +94,17 @@ func (s *Stack) Pop() (v interface{}, ok bool) {
 
 	s.Unlock()
 	return
+}
+
+// Range does range all elements in stack with mutex lock,
+// so you can't do `Push` or `Pop` in `Range`.
+func (s *Stack) Range(handle func(v interface{}) bool) {
+	s.Lock()
+	for i := 0; i < s.pos; i++ {
+		bp, qp := i/bucketSize, i%bucketSize
+		if !handle(s.buckets[bp][qp]) {
+			break
+		}
+	}
+	s.Unlock()
 }
