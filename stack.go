@@ -78,7 +78,7 @@ func (s *Stack) Pop() (v interface{}, ok bool) {
 		s.buckets[bp] = nil // free the bucket
 		s.buckets = s.buckets[:len(s.buckets)-1]
 
-		// reduce memory usage when no reallocation(append in Pushs), TestSlice2 in slice_test.go
+		// reduce memory usage when no reallocation(append in Push), TestSlice2 in slice_test.go
 		if len(s.buckets) <= cap(s.orgBuckets)/4 { // the usage is less than or equal to a quater of the capacity
 			tmp := make([][]interface{}, cap(s.orgBuckets)/2)
 			n := copy(tmp, s.buckets)
