@@ -46,7 +46,7 @@ func TestPow(t *testing.T) {
 
 func testPow(x, expected float64, n int, t *testing.T) {
 	res := pow(float64(x), n)
-	if res-expected < 0.0001 {
+	if res-expected >= 0.0001 {
 		t.Logf("%f^%d, result:%f, expected:%f", x, n, res, expected)
 		t.Fail()
 	}

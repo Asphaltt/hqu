@@ -33,7 +33,20 @@ func (q *Queue) Size() int {
 // Enqueue pushes a value into the queue.
 func (q *Queue) Enqueue(v interface{}) {
 	q.Lock()
+	q.enqueue(v)
+	q.Unlock()
+}
 
+// Enqueue1 pushes a value into the queue and returns the size of the queue.
+func (q *Queue) Enqueue1(v interface{}) (size int) {
+	q.Lock()
+	q.enqueue(v)
+	size = q.rear - q.front
+	q.Unlock()
+	return
+}
+
+func (q *Queue) enqueue(v interface{}) {
 	bp := q.rear / bucketSize
 
 	var bkt []interface{}
@@ -57,31 +70,33 @@ func (q *Queue) Enqueue(v interface{}) {
 
 	bkt[q.rear%bucketSize] = v
 	q.rear++
-
-	q.Unlock()
 }
 
-// Dequeue pops a value from the queue.
+// Dequeue pops a value from the queue with locking.
 func (q *Queue) Dequeue() (v interface{}, ok bool) {
 	q.Lock()
+	v, ok = q.Dequeue0()
+	q.Unlock()
+	return
+}
+
+// Dequeue0 pops a value from the queue without locking.
+func (q *Queue) Dequeue0() (v interface{}, ok bool) {
 	if q.rear == q.front {
-		q.Unlock()
 		return nil, false
 	}
 
-	bp, fp := q.front/bucketSize, q.front%bucketSize
-
-	bkt := q.buckets[bp]
-	v, ok = bkt[fp], true
-	bkt[fp] = nil // free the value
+	bkt := q.buckets[0]
+	v, ok = bkt[q.front], true
+	bkt[q.front] = nil // free the value
 
 	q.front++
-	if q.front%bucketSize == 0 {
-		q.buckets[bp] = nil // free the bucket
+	if q.front == bucketSize {
+		q.buckets[0] = nil // free the bucket
 		q.buckets = q.buckets[1:]
 
 		// recude memory usage when no reallocation(append in Enqueue), TestSlice1 in slice_test.go
-		if len(q.buckets) <= cap(q.orgBuckets)/4 { // the usage is less than or equal to a quater of the capacity
+		if len(q.buckets)<<2 <= cap(q.orgBuckets) { // the usage is less than or equal to a quater of the capacity
 			tmp := make([][]interface{}, cap(q.orgBuckets)/2)
 			n := copy(tmp, q.buckets)
 			q.buckets = tmp[:n]
@@ -97,7 +112,6 @@ func (q *Queue) Dequeue() (v interface{}, ok bool) {
 		q.rear -= bucketSize
 	}
 
-	q.Unlock()
 	return
 }
 

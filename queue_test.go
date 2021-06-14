@@ -56,6 +56,11 @@ func TestQueue1(t *testing.T) {
 		q.Enqueue(i)
 	}
 
+	if q.Size() != bucketSize*maxFreelist {
+		t.Logf("queue size, got %d, expect %d", q.Size(), bucketSize*maxFreelist)
+		t.Fail()
+	}
+
 	if len(q.buckets) != maxFreelist {
 		t.Logf("length of buckets is not %d, is %d", maxFreelist, len(q.buckets))
 		t.Fail()
